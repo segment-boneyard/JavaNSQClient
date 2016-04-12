@@ -6,7 +6,7 @@
 
   <groupId>com.segment.nsq</groupId>
   <artifactId>nsq-client</artifactId>
-  <version>1.0.0</version>
+  <version>0.1.0-SNAPSHOT</version>
 
   <name>JavaNSQClient</name>
   <description>Fast Java client for NSQ.</description>
