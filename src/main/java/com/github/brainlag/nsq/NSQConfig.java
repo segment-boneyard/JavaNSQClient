@@ -140,20 +140,20 @@ public class NSQConfig {
     @Override
     public String toString() {
         StringBuffer buffer = new StringBuffer();
-        buffer.append("{\"client_id\":\"" + clientId + "\", ");
-        buffer.append("\"hostname\":\"" + hostname + "\", ");
+        buffer.append("{\"client_id\":\"").append(clientId).append("\", ");
+        buffer.append("\"hostname\":\"").append(hostname).append("\", ");
         buffer.append("\"feature_negotiation\": true, ");
         if (getHeartbeatInterval() != null) {
-            buffer.append("\"heartbeat_interval\":" + getHeartbeatInterval().toString() + ", ");
+            buffer.append("\"heartbeat_interval\":").append(getHeartbeatInterval().toString()).append(", ");
         }
         if (getOutputBufferSize() != null) {
-            buffer.append("\"output_buffer_size\":" + getOutputBufferSize().toString() + ", ");
+            buffer.append("\"output_buffer_size\":").append(getOutputBufferSize().toString()).append(", ");
         }
         if (getOutputBufferTimeout() != null) {
-            buffer.append("\"output_buffer_timeout\":" + getOutputBufferTimeout().toString() + ", ");
+            buffer.append("\"output_buffer_timeout\":").append(getOutputBufferTimeout().toString()).append(", ");
         }
         if (isTlsV1()) {
-            buffer.append("\"tls_v1\":" + isTlsV1() + ", ");
+            buffer.append("\"tls_v1\":").append(isTlsV1()).append(", ");
         }
         if (getCompression() == Compression.SNAPPY) {
             buffer.append("\"snappy\": true, ");
@@ -162,15 +162,15 @@ public class NSQConfig {
             buffer.append("\"deflate\": true, ");
         }
         if (getDeflateLevel() != null) {
-            buffer.append("\"deflate_level\":" + getDeflateLevel().toString() + ", ");
+            buffer.append("\"deflate_level\":").append(getDeflateLevel().toString()).append(", ");
         }
         if (getSampleRate() != null) {
-            buffer.append("\"sample_rate\":" + getSampleRate().toString() + ", ");
+            buffer.append("\"sample_rate\":").append(getSampleRate().toString()).append(", ");
         }
         if (getMsgTimeout() != null) {
-            buffer.append("\"msg_timeout\":" + getMsgTimeout().toString() + ", ");
+            buffer.append("\"msg_timeout\":").append(getMsgTimeout().toString()).append(", ");
         }
-        buffer.append("\"user_agent\": \"" + userAgent + "\"}");
+        buffer.append("\"user_agent\": \"").append(userAgent).append("\"}");
 
         return buffer.toString();
     }

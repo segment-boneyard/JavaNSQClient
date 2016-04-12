@@ -6,6 +6,7 @@ import com.github.brainlag.nsq.exceptions.NoConnectionsException;
 import com.github.brainlag.nsq.frames.ErrorFrame;
 import com.github.brainlag.nsq.frames.NSQFrame;
 import com.github.brainlag.nsq.lookup.NSQLookup;
+import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.apache.logging.log4j.LogManager;
@@ -15,15 +16,8 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class NSQConsumer implements Closeable {
@@ -43,7 +37,7 @@ public class NSQConsumer implements Closeable {
     private long lookupPeriod = 60 * 1000; // how often to recheck for new nodes (and clean up non responsive nodes)
     private ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     private ExecutorService executor = Executors.newCachedThreadPool();
-    private Optional<ScheduledFuture<?>> timeout = Optional.empty();
+    private Optional<? extends ScheduledFuture<?>> timeout = Optional.absent();
 
     public NSQConsumer(final NSQLookup lookup, final String topic, final String channel, final NSQMessageCallback callback) {
         this(lookup, topic, channel, callback, new NSQConfig());
@@ -70,8 +64,11 @@ public class NSQConsumer implements Closeable {
             started = true;
             //connect once otherwise we might have to wait one lookupPeriod
             connect();
-            scheduler.scheduleAtFixedRate(() -> {
-                connect();
+            scheduler.scheduleAtFixedRate(new Runnable() {
+                @Override
+                public void run() {
+                    NSQConsumer.this.connect();
+                }
             }, lookupPeriod, lookupPeriod, TimeUnit.MILLISECONDS);
         }
         return this;
@@ -98,7 +95,12 @@ public class NSQConsumer implements Closeable {
             LogManager.getLogger(this).warn("NO Callback, dropping message: " + message);
         } else {
             try {
-                executor.execute(() -> callback.message(message));
+                executor.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        callback.message(message);
+                    }
+                });
                 if (nextTimeout > 0) {
                     updateTimeout(message, -500);
                 }
@@ -124,8 +126,11 @@ public class NSQConsumer implements Closeable {
         }
         Date newTimeout = calculateTimeoutDate(change);
         if (newTimeout != null) {
-            timeout = Optional.of(scheduler.schedule(() -> {
-                rdy(message, 1); // test the waters
+            timeout = Optional.of(scheduler.schedule(new Runnable() {
+                @Override
+                public void run() {
+                    NSQConsumer.this.rdy(message, 1); // test the waters
+                }
             }, 0, TimeUnit.MILLISECONDS));
         }
     }

@@ -35,10 +35,15 @@ public class NSQHandler extends SimpleChannelInboundHandler<NSQFrame> {
 	}
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, NSQFrame msg) throws Exception {
+    protected void channelRead0(ChannelHandlerContext ctx, final NSQFrame msg) throws Exception {
         final Connection con = ctx.channel().attr(Connection.STATE).get();
         if (con != null) {
-            ctx.channel().eventLoop().execute(() -> con.incoming(msg));
+            ctx.channel().eventLoop().execute(new Runnable() {
+                @Override
+                public void run() {
+                    con.incoming(msg);
+                }
+            });
         } else {
             LogManager.getLogger(this).warn("No connection set for : " + ctx.channel());
         }
